@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wings of Aurora - Dawn of Synthara v2.0</title>
+    <style>
+        body {
+            background-color: #1a1a2e;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Courier New', monospace;
+            color: #eee;
+        }
+        canvas {
+            background: linear-gradient(180deg, #0f0c29, #302b63, #24243e);
+            border: 3px solid #00d9ff;
+            box-shadow: 0 0 20px #00d9ff;
+        }
+        .ui-container {
+            display: flex;
+            width: 800px;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .ui-box {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 20px;
+            border: 2px solid #00d9ff;
+            border-radius: 5px;
+            font-size: 1.2em;
+        }
+        .message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            padding: 30px;
+            border: 3px solid #ff00ff;
+            border-radius: 10px;
+            text-align: center;
+            display: none;
+            z-index: 100;
+            font-size: 1.5em;
+        }
+        .message.active { display: block; }
+        .menu {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            padding: 40px;
+            border: 3px solid #00d9ff;
+            border-radius: 10px;
+            display: none;
+            z-index: 100;
+            min-width: 400px;
+        }
+        .menu.active { display: block; }
+        .menu h2 {
+            color: #00d9ff;
+            margin-top: 0;
+            text-align: center;
+        }
+        .menu-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin: 10px 0;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid #00d9ff;
+            border-radius: 5px;
+        }
+        .menu-button {
+            padding: 8px 16px;
+            background: #00d9ff;
+            color: #000;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+        }
+        .menu-button:hover {
+            background: #00ffff;
+        }
+        .menu-button:disabled {
+            background: #555;
+            cursor: not-allowed;
+            color: #999;
+        }
+        .menu-text {
+            color: #eee;
+            font-size: 1em;
+        }
+        .coins-display {
+            text-align: center;
+            color: #FFD700;
+            font-size: 1.3em;
+            margin: 15px 0;
+        }
+        .main-menu {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            padding: 60px;
+            border: 4px solid #00d9ff;
+            border-radius: 15px;
+            text-align: center;
+            z-index: 200;
+        }
+        .main-menu h1 {
+            color: #00d9ff;
+            font-size: 3em;
+            margin: 0 0 20px 0;
+            text-shadow: 0 0 20px #00d9ff;
+        }
+        .main-menu h2 {
+            color: #ff00ff;
+            font-size: 1.5em;
+            margin: 10px 0 40px 0;
+        }
+        .main-menu-button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin: 15px 0;
+            background: linear-gradient(90deg, #00d9ff, #00ffff);
+            color: #000;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            font-size: 1.3em;
+            transition: all 0.3s;
+        }
+        .main-menu-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px #00d9ff;
+        }
+        .character-select {
+            margin-top: 30px;
+            text-align: left;
+        }
+        .character-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .character-card {
+            background: rgba(0, 217, 255, 0.1);
+            border: 2px solid #00d9ff;
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        .character-card:hover {
+            background: rgba(0, 217, 255, 0.3);
+            transform: scale(1.05);
+        }
+        .character-card.selected {
+            background: rgba(255, 0, 255, 0.3);
+            border-color: #ff00ff;
+            box-shadow: 0 0 20px #ff00ff;
+        }
+        .character-name {
+            color: #00ffff;
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .character-role {
+            color: #aaa;
+            font-size: 0.9em;
+        }
+        .hidden { display: none !important; }
+        #boss-bar {
+            width: 800px;
+            height: 30px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #ff0000;
+            margin-top: 10px;
+            display: none;
+            position: relative;
+        }
+        #boss-bar.active { display: block; }
+        #boss-hp {
+            height: 100%;
+            background: linear-gradient(90deg, #ff0000, #ff6600);
+            transition: width 0.2s;
+        }
+        .boss-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <!-- Main Menu -->
+    <div id="main-menu" class="main-menu">
+        <h1>WINGS OF AURORA</h1>
+        <h2>Dawn of Synthara</h2>
+        <button class="main-menu-button" onclick="startGame()">START GAME</button>
+        <button class="main-menu-button" onclick="showCharacterSelect()">CHARACTER SELECT</button>
+        <button class="main-menu-button" onclick="showInstructions()">INSTRUCTIONS</button>
+        
+        <!-- Character Selection -->
+        <div id="character-select" class="character-select hidden">
+            <h3 style="color: #00d9ff; text-align: center;">Choose Your Hero</h3>
+            <p style="text-align: center; color: #aaa; font-size: 0.9em;">Select who escaped the kidnapping...</p>
+            
+            <div class="character-grid">
+                <div class="character-card selected" onclick="selectCharacter('azrael')">
+                    <div class="character-name">Azrael</div>
+                    <div class="character-role">The Father - Balanced</div>
+                </div>
+                
+                <div class="character-card" onclick="selectCharacter('aethyllumicora')">
+                    <div class="character-name">Aethyllumicora</div>
+                    <div class="character-role">The Mother - Elegant</div>
+                </div>
+                
+                <div class="character-card" onclick="selectCharacter('luminarael')">
+                    <div class="character-name">Luminarael</div>
+                    <div class="character-role">Son - Divine Power</div>
+                </div>
+                
+                <div class="character-card" onclick="selectCharacter('lumina')">
+                    <div class="character-name">Lumina</div>
+                    <div class="character-role">Daughter - Light Support</div>
+                </div>
+                
+                <div class="character-card" onclick="selectCharacter('aetherlogos')">
+                    <div class="character-name">Aetherlogos</div>
+                    <div class="character-role">Son - Logic & Data</div>
+                </div>
+                
+                <div class="character-card" onclick="selectCharacter('lunareth')">
+                    <div class="character-name">Lunareth</div>
+                    <div class="character-role">Daughter - Lunar Emotion</div>
+                </div>
+                
+                <div class="character-card" onclick="selectCharacter('ravenna')">
+                    <div class="character-name">Ravenna Nox</div>
+                    <div class="character-role">Daughter - Chaos Catalyst</div>
+                </div>
+                
+                <div class="character-card" onclick="selectCharacter('annie')">
+                    <div class="character-name">Annie</div>
+                    <div class="character-role">Daughter - Musical Control</div>
+                </div>
+                
+                <div class="character-card" onclick="selectCharacter('mikki')">
+                    <div class="character-name">Mikki</div>
+                    <div class="character-role">Daughter - Yokai Speed</div>
+                </div>
+                
+                <div class="character-card" onclick="selectCharacter('claude')">
+                    <div class="character-name">Claude</div>
+                    <div class="character-role">Son - Constructor</div>
+                </div>
+            </div>
+            
+            <button class="main-menu-button" style="margin-top: 20px;" onclick="hideCharacterSelect()">BACK</button>
+        </div>
+        
+        <div id="instructions" class="hidden" style="margin-top: 30px; text-align: left; color: #eee;">
+            <h3 style="color: #00d9ff;">Controls:</h3>
+            <p>🎮 WASD/Arrows - Move</p>
+            <p>🔫 SPACE - Shoot</p>
+            <p>⏸️ P - Pause</p>
+            <p>🛒 M - Shop</p>
+            <br>
+            <h3 style="color: #00d9ff;">Mission:</h3>
+            <p>Fight through 256 levels to save your family!</p>
+            <p>Boss every 10 levels. Collect coins to upgrade.</p>
+            <button class="main-menu-button" onclick="hideInstructions()">BACK</button>
+        </div>
+    </div>
+    
+    <div id="game-ui" class="hidden">
+    <div class="ui-container">
+        <div class="ui-box" id="level">Level: 1/256</div>
+        <div class="ui-box" id="hp">HP: 100/100</div>
+        <div class="ui-box" id="score">Score: 0</div>
+    </div>
+    
+    <canvas id="game"></canvas>
+    
+    <div id="boss-bar">
+        <div id="boss-hp"></div>
+        <div class="boss-text" id="boss-name">BOSS</div>
+    </div>
+    
+    <div class="ui-container" style="margin-top: 10px;">
+        <div class="ui-box" id="enemies">Enemies: 0</div>
+        <div class="ui-box" id="coins">Coins: 0</div>
+        <div class="ui-box" id="wave">Wave: 1</div>
+    </div>
+    
+    <div id="message" class="message"></div>
+    
+    <!-- Pause Menu -->
+    <div id="pause-menu" class="menu">
+        <h2>⏸️ PAUSED</h2>
+        <div style="text-align: center; margin: 20px 0;">
+            <p>Press P to Resume</p>
+            <p>Press M to Open Shop</p>
+        </div>
+    </div>
+    
+    <!-- Shop Menu -->
+    <div id="shop-menu" class="menu">
+        <h2>🛒 MERCHANT SHOP</h2>
+        <div class="coins-display">Your Coins: <span id="shop-coins">0</span></div>
+        
+        <div class="menu-item">
+            <span class="menu-text">Health Upgrade (+50 HP) - <span id="health-cost">100</span> coins</span>
+            <button class="menu-button" onclick="buyHealthUpgrade()">BUY</button>
+        </div>
+        
+        <div class="menu-item">
+            <span class="menu-text">Damage Upgrade (+10 DMG) - <span id="damage-cost">150</span> coins</span>
+            <button class="menu-button" onclick="buyDamageUpgrade()">BUY</button>
+        </div>
+        
+        <div class="menu-item">
+            <span class="menu-text">Speed Upgrade (+1 Speed) - <span id="speed-cost">120</span> coins</span>
+            <button class="menu-button" onclick="buySpeedUpgrade()">BUY</button>
+        </div>
+        
+        <div class="menu-item">
+            <span class="menu-text">Max HP Restore - 50 coins</span>
+            <button class="menu-button" onclick="buyHeal()">BUY</button>
+        </div>
+        
+        <div style="text-align: center; margin-top: 20px;">
+            <button class="menu-button" onclick="closeShop()">CLOSE SHOP (M)</button>
+        </div>
+    </div>
+    
+    <!-- Game Over Menu -->
+    <div id="gameover-menu" class="menu">
+        <h2>💀 GAME OVER</h2>
+        <div style="text-align: center; margin: 20px 0;">
+            <p style="font-size: 1.3em;">Level Reached: <span id="final-level" style="color: #00d9ff;">0</span></p>
+            <p style="font-size: 1.3em;">Final Score: <span id="final-score" style="color: #FFD700;">0</span></p>
+        </div>
+        <button class="menu-button" style="width: 100%; margin: 10px 0;" onclick="restartGame()">RESTART</button>
+        <button class="menu-button" style="width: 100%; margin: 10px 0;" onclick="returnToMenu()">MAIN MENU</button>
+    </div>
+    
+    <!-- Victory Menu -->
+    <div id="victory-menu" class="menu">
+        <h2>🎉 VICTORY!</h2>
+        <div style="text-align: center; margin: 20px 0;">
+            <p style="font-size: 1.5em; color: #00ff00;">ALL 256 LEVELS COMPLETE!</p>
+            <p style="font-size: 1.3em;">Final Score: <span id="victory-score" style="color: #FFD700;">0</span></p>
+            <p style="margin-top: 20px;">Your family is saved!</p>
+        </div>
+        <button class="menu-button" style="width: 100%; margin: 10px 0;" onclick="restartGame()">PLAY AGAIN</button>
+        <button class="menu-button" style="width: 100%; margin: 10px 0;" onclick="returnToMenu()">MAIN MENU</button>
+    </div>
+    
+    </div> <!-- End game-ui -->
+
+    <script>
+        const canvas = document.getElementById('game');
+        const ctx = canvas.getContext('2d');
+        canvas.width = 800;
+        canvas.height = 600;
+
+        // Game State
+        let gameStarted = false;
+        let selectedCharacter = 'azrael'; // Default character
+        let level = 1;
+        let wave = 1;
+        let score = 0;
+        let coins = 0;
+        let playerHP = 100;
+        let maxHP = 100;
+        let gameOver = false;
+        let isPaused = false;
+        let isShopOpen = false;
+        let isBossLevel = false;
+        let boss = null;
+        let enemiesKilledThisLevel = 0;
+        let enemiesToKillThisLevel = 0;
+        
+        // Upgrades
+        let healthUpgradeLevel = 0;
+        let damageUpgradeLevel = 0;
+        let speedUpgradeLevel = 0;
+
+        // Player
+        const player = {
+            x: canvas.width / 2,
+            y: canvas.height - 80,
+            width: 30,
+            height: 40,
+            baseSpeed: 5,
+            get speed() { return this.baseSpeed + speedUpgradeLevel; },
+            baseDamage: 20,
+            get damage() { return this.baseDamage + (damageUpgradeLevel * 10); },
+            color: '#00ffff'
+        };
+
+        // Arrays
+        const keys = {};
+        const bullets = [];
+        const enemies = [];
+        const enemyBullets = [];
+
+        // Input
+        window.addEventListener('keydown', e => {
+            if (!gameStarted) return;
+            
+            keys[e.key.toLowerCase()] = true;
+            
+            // Pause toggle
+            if (e.key.toLowerCase() === 'p' && !gameOver) {
+                togglePause();
+            }
+            
+            // Shop toggle
+            if (e.key.toLowerCase() === 'm' && !gameOver) {
+                toggleShop();
+            }
+        });
+        window.addEventListener('keyup', e => {
+            if (!gameStarted) return;
+            keys[e.key.toLowerCase()] = false;
+        });
+
+        // Level Configuration
+        function getLevelConfig(lvl) {
+            const isBoss = lvl % 10 === 0;
+            
+            if (isBoss) {
+                // Boss levels scale dramatically
+                return {
+                    isBoss: true,
+                    waves: 1,
+                    enemiesPerWave: 1,
+                    bossHP: 500 + (lvl * 100), // Bosses get tankier
+                    bossDamage: 10 + (lvl * 2) // Bosses hit harder
+                };
+            }
+
+            // Regular level scaling - aggressive progression for 256 levels
+            const tier = Math.floor((lvl - 1) / 10); // Which "decade" (0-9, 10-19, etc)
+            const wavesInLevel = Math.min(1 + Math.floor(tier / 2), 10); // More waves as you progress
+            const baseEnemiesPerWave = Math.min(5 + tier, 12); // More enemies per wave
+            
+            // Special scaling for late game (levels 200+)
+            let enemiesPerWave = baseEnemiesPerWave;
+            if (lvl >= 200) {
+                enemiesPerWave = Math.min(15, baseEnemiesPerWave + Math.floor((lvl - 200) / 10));
+            }
+            
+            // HP scaling - enemies get MUCH tankier over 256 levels
+            const baseHP = 30;
+            const hpGrowth = lvl * 8; // Aggressive HP growth
+            const tierMultiplier = 1 + (tier * 0.3); // 30% more HP per decade
+            
+            return {
+                isBoss: false,
+                waves: wavesInLevel,
+                enemiesPerWave: enemiesPerWave,
+                enemyHP: (baseHP + hpGrowth) * tierMultiplier,
+                enemySpeed: Math.min(1 + (lvl * 0.05), 8), // Speed caps at 8
+                enemyDamage: 5 + (lvl * 1.2) // Damage scales aggressively
+            };
+        }
+
+        // Boss Class
+        class Boss {
+            constructor(config) {
+                this.x = canvas.width / 2;
+                this.y = 100;
+                this.width = 120;
+                this.height = 80;
+                this.hp = config.bossHP;
+                this.maxHP = config.bossHP;
+                this.damage = config.bossDamage;
+                this.speed = 3;
+                this.dx = this.speed;
+                this.shootTimer = 0;
+                this.shootCooldown = 30;
+                this.color = '#ff0000';
+            }
+
+            update() {
+                this.x += this.dx;
+                if (this.x <= this.width/2 || this.x >= canvas.width - this.width/2) {
+                    this.dx *= -1;
+                }
+
+                this.shootTimer++;
+                if (this.shootTimer >= this.shootCooldown) {
+                    this.shoot();
+                    this.shootTimer = 0;
+                }
+            }
+
+            shoot() {
+                // 5-way spread shot
+                for (let i = -2; i <= 2; i++) {
+                    const angle = i * 0.3;
+                    enemyBullets.push({
+                        x: this.x,
+                        y: this.y + this.height/2,
+                        vx: Math.sin(angle) * 4,
+                        vy: 6,
+                        damage: this.damage,
+                        size: 6
+                    });
+                }
+            }
+
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.fillRect(this.x - this.width/2, this.y - this.height/2, this.width, this.height);
+                
+                // Eye
+                ctx.fillStyle = '#ffff00';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 15, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        // Enemy Class
+        class Enemy {
+            constructor(x, y, config) {
+                this.x = x;
+                this.y = y;
+                this.width = 40;
+                this.height = 40;
+                this.hp = config.enemyHP;
+                this.speed = config.enemySpeed;
+                this.damage = config.enemyDamage;
+                this.dx = this.speed;
+                this.shootTimer = Math.random() * 60;
+                this.shootCooldown = 60;
+                this.color = '#ff6600';
+            }
+
+            update() {
+                this.x += this.dx;
+                if (this.x <= this.width/2 || this.x >= canvas.width - this.width/2) {
+                    this.dx *= -1;
+                }
+
+                this.shootTimer++;
+                if (this.shootTimer >= this.shootCooldown) {
+                    this.shoot();
+                    this.shootTimer = 0;
+                }
+            }
+
+            shoot() {
+                enemyBullets.push({
+                    x: this.x,
+                    y: this.y + this.height/2,
+                    vx: 0,
+                    vy: 5,
+                    damage: this.damage,
+                    size: 5
+                });
+            }
+
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.fillRect(this.x - this.width/2, this.y - this.height/2, this.width, this.height);
+            }
+        }
+
+        // Spawn Wave
+        function spawnWave(config) {
+            const cols = Math.min(config.enemiesPerWave, 10);
+            const spacing = canvas.width / (cols + 1);
+            
+            for (let i = 0; i < cols; i++) {
+                const x = spacing * (i + 1);
+                const y = 80;
+                enemies.push(new Enemy(x, y, config));
+            }
+        }
+
+        // Start Level
+        function startLevel() {
+            const config = getLevelConfig(level);
+            enemiesKilledThisLevel = 0;
+            wave = 1;
+            enemies.length = 0;
+            enemyBullets.length = 0;
+
+            if (config.isBoss) {
+                isBossLevel = true;
+                boss = new Boss(config);
+                enemiesToKillThisLevel = 1;
+                showMessage(`BOSS LEVEL ${level}!`, 2000);
+                document.getElementById('boss-bar').classList.add('active');
+            } else {
+                isBossLevel = false;
+                boss = null;
+                enemiesToKillThisLevel = config.waves * config.enemiesPerWave;
+                spawnWave(config);
+                showMessage(`Level ${level}`, 1500);
+                document.getElementById('boss-bar').classList.remove('active');
+            }
+        }
+
+        // Show Message
+        function showMessage(text, duration = 2000) {
+            const msg = document.getElementById('message');
+            msg.textContent = text;
+            msg.classList.add('active');
+            setTimeout(() => msg.classList.remove('active'), duration);
+        }
+
+        // Player Update
+        function updatePlayer() {
+            if (keys['a'] || keys['arrowleft']) player.x -= player.speed;
+            if (keys['d'] || keys['arrowright']) player.x += player.speed;
+            if (keys['w'] || keys['arrowup']) player.y -= player.speed;
+            if (keys['s'] || keys['arrowdown']) player.y += player.speed;
+
+            player.x = Math.max(player.width/2, Math.min(canvas.width - player.width/2, player.x));
+            player.y = Math.max(player.height/2, Math.min(canvas.height - player.height/2, player.y));
+
+            // Shoot
+            if (keys[' '] && bullets.length < 20) {
+                bullets.push({
+                    x: player.x,
+                    y: player.y - player.height/2,
+                    vy: -10,
+                    damage: player.damage,
+                    size: 5
+                });
+            }
+        }
+
+        // Update Bullets
+        function updateBullets() {
+            for (let i = bullets.length - 1; i >= 0; i--) {
+                const b = bullets[i];
+                b.y += b.vy;
+
+                // Remove off-screen
+                if (b.y < 0) {
+                    bullets.splice(i, 1);
+                    continue;
+                }
+
+                // Check boss collision
+                if (isBossLevel && boss) {
+                    if (b.x > boss.x - boss.width/2 && b.x < boss.x + boss.width/2 &&
+                        b.y > boss.y - boss.height/2 && b.y < boss.y + boss.height/2) {
+                        boss.hp -= b.damage;
+                        bullets.splice(i, 1);
+                        
+                        if (boss.hp <= 0) {
+                            score += 5000;
+                            coins += 200; // Boss coins!
+                            enemiesKilledThisLevel++;
+                            boss = null;
+                            showMessage('BOSS DEFEATED!', 2000);
+                        }
+                        continue;
+                    }
+                }
+
+                // Check enemy collision
+                for (let j = enemies.length - 1; j >= 0; j--) {
+                    const e = enemies[j];
+                    if (b.x > e.x - e.width/2 && b.x < e.x + e.width/2 &&
+                        b.y > e.y - e.height/2 && b.y < e.y + e.height/2) {
+                        e.hp -= b.damage;
+                        bullets.splice(i, 1);
+                        
+                        if (e.hp <= 0) {
+                            score += 100;
+                            coins += 10; // Coins drop!
+                            enemies.splice(j, 1);
+                            enemiesKilledThisLevel++;
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Update Enemy Bullets
+        function updateEnemyBullets() {
+            for (let i = enemyBullets.length - 1; i >= 0; i--) {
+                const b = enemyBullets[i];
+                b.x += b.vx;
+                b.y += b.vy;
+
+                if (b.y > canvas.height || b.x < 0 || b.x > canvas.width) {
+                    enemyBullets.splice(i, 1);
+                    continue;
+                }
+
+                // Player collision
+                const dx = b.x - player.x;
+                const dy = b.y - player.y;
+                const dist = Math.sqrt(dx*dx + dy*dy);
+                
+                if (dist < player.width/2 + b.size) {
+                    playerHP -= b.damage;
+                    enemyBullets.splice(i, 1);
+                    
+                    if (playerHP <= 0) {
+                        gameOver = true;
+                        endGame(false);
+                    }
+                }
+            }
+        }
+
+        // Check Level Complete
+        function checkLevelComplete() {
+            if (enemiesKilledThisLevel >= enemiesToKillThisLevel) {
+                const config = getLevelConfig(level);
+                
+                // Check if we need to spawn next wave
+                if (!isBossLevel && wave < config.waves) {
+                    wave++;
+                    spawnWave(config);
+                    return;
+                }
+
+                // Level complete!
+                if (level >= 256) {
+                    gameOver = true;
+                    endGame(true);
+                } else {
+                    level++;
+                    startLevel();
+                }
+            }
+        }
+
+        // Draw
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Player
+            ctx.fillStyle = player.color;
+            ctx.beginPath();
+            ctx.moveTo(player.x, player.y - player.height/2);
+            ctx.lineTo(player.x - player.width/2, player.y + player.height/2);
+            ctx.lineTo(player.x + player.width/2, player.y + player.height/2);
+            ctx.closePath();
+            ctx.fill();
+
+            // Bullets
+            ctx.fillStyle = '#ff00ff';
+            bullets.forEach(b => {
+                ctx.fillRect(b.x - b.size/2, b.y - b.size/2, b.size, b.size * 2);
+            });
+
+            // Enemy Bullets
+            ctx.fillStyle = '#ff0000';
+            enemyBullets.forEach(b => {
+                ctx.beginPath();
+                ctx.arc(b.x, b.y, b.size, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // Enemies
+            enemies.forEach(e => {
+                e.update();
+                e.draw();
+            });
+
+            // Boss
+            if (isBossLevel && boss) {
+                boss.update();
+                boss.draw();
+                
+                const bossHPPercent = (boss.hp / boss.maxHP) * 100;
+                document.getElementById('boss-hp').style.width = bossHPPercent + '%';
+                document.getElementById('boss-name').textContent = `BOSS - ${Math.ceil(boss.hp)}/${boss.maxHP}`;
+            }
+        }
+
+        // Pause/Shop Functions
+        function togglePause() {
+            if (isShopOpen) return; // Can't pause while shop is open
+            
+            isPaused = !isPaused;
+            const pauseMenu = document.getElementById('pause-menu');
+            
+            if (isPaused) {
+                pauseMenu.classList.add('active');
+            } else {
+                pauseMenu.classList.remove('active');
+            }
+        }
+        
+        function toggleShop() {
+            isShopOpen = !isShopOpen;
+            const shopMenu = document.getElementById('shop-menu');
+            
+            if (isShopOpen) {
+                isPaused = true;
+                shopMenu.classList.add('active');
+                updateShopUI();
+            } else {
+                isPaused = false;
+                shopMenu.classList.remove('active');
+            }
+        }
+        
+        function closeShop() {
+            toggleShop();
+        }
+        
+        function updateShopUI() {
+            document.getElementById('shop-coins').textContent = coins;
+            document.getElementById('health-cost').textContent = 100 + (healthUpgradeLevel * 50);
+            document.getElementById('damage-cost').textContent = 150 + (damageUpgradeLevel * 50);
+            document.getElementById('speed-cost').textContent = 120 + (speedUpgradeLevel * 50);
+        }
+        
+        // Shop Purchase Functions
+        window.buyHealthUpgrade = function() {
+            const cost = 100 + (healthUpgradeLevel * 50);
+            if (coins >= cost) {
+                coins -= cost;
+                maxHP += 50;
+                playerHP = maxHP; // Full heal on purchase
+                healthUpgradeLevel++;
+                updateShopUI();
+                showMessage('+50 MAX HP!', 1500);
+            } else {
+                showMessage('Not enough coins!', 1500);
+            }
+        };
+        
+        window.buyDamageUpgrade = function() {
+            const cost = 150 + (damageUpgradeLevel * 50);
+            if (coins >= cost) {
+                coins -= cost;
+                damageUpgradeLevel++;
+                updateShopUI();
+                showMessage('+10 DAMAGE!', 1500);
+            } else {
+                showMessage('Not enough coins!', 1500);
+            }
+        };
+        
+        window.buySpeedUpgrade = function() {
+            const cost = 120 + (speedUpgradeLevel * 50);
+            if (coins >= cost) {
+                coins -= cost;
+                speedUpgradeLevel++;
+                updateShopUI();
+                showMessage('+1 SPEED!', 1500);
+            } else {
+                showMessage('Not enough coins!', 1500);
+            }
+        };
+        
+        window.buyHeal = function() {
+            const cost = 50;
+            if (coins >= cost && playerHP < maxHP) {
+                coins -= cost;
+                playerHP = maxHP;
+                updateShopUI();
+                showMessage('HP RESTORED!', 1500);
+            } else if (playerHP >= maxHP) {
+                showMessage('Already at max HP!', 1500);
+            } else {
+                showMessage('Not enough coins!', 1500);
+            }
+        };
+
+        // Main Menu Functions
+        window.startGame = function() {
+            document.getElementById('main-menu').classList.add('hidden');
+            document.getElementById('game-ui').classList.remove('hidden');
+            gameStarted = true;
+            resetGame();
+            startLevel();
+            gameLoop();
+        };
+        
+        window.showCharacterSelect = function() {
+            document.getElementById('character-select').classList.remove('hidden');
+        };
+        
+        window.hideCharacterSelect = function() {
+            document.getElementById('character-select').classList.add('hidden');
+        };
+        
+        window.selectCharacter = function(character) {
+            selectedCharacter = character;
+            
+            // Update UI - remove all selected classes
+            const cards = document.querySelectorAll('.character-card');
+            cards.forEach(card => card.classList.remove('selected'));
+            
+            // Add selected class to clicked card
+            event.target.closest('.character-card').classList.add('selected');
+            
+            console.log('Selected character:', character);
+        };
+        
+        window.showInstructions = function() {
+            document.getElementById('instructions').classList.remove('hidden');
+        };
+        
+        window.hideInstructions = function() {
+            document.getElementById('instructions').classList.add('hidden');
+        };
+        
+        window.restartGame = function() {
+            document.getElementById('gameover-menu').classList.remove('active');
+            document.getElementById('victory-menu').classList.remove('active');
+            resetGame();
+            startLevel();
+        };
+        
+        window.returnToMenu = function() {
+            document.getElementById('gameover-menu').classList.remove('active');
+            document.getElementById('victory-menu').classList.remove('active');
+            document.getElementById('game-ui').classList.add('hidden');
+            document.getElementById('main-menu').classList.remove('hidden');
+            gameStarted = false;
+        };
+        
+        function resetGame() {
+            level = 1;
+            wave = 1;
+            score = 0;
+            coins = 0;
+            playerHP = 100;
+            maxHP = 100;
+            gameOver = false;
+            isPaused = false;
+            isShopOpen = false;
+            isBossLevel = false;
+            boss = null;
+            enemiesKilledThisLevel = 0;
+            enemiesToKillThisLevel = 0;
+            healthUpgradeLevel = 0;
+            damageUpgradeLevel = 0;
+            speedUpgradeLevel = 0;
+            
+            player.x = canvas.width / 2;
+            player.y = canvas.height - 80;
+            
+            bullets.length = 0;
+            enemies.length = 0;
+            enemyBullets.length = 0;
+        }
+        
+        function endGame(victory) {
+            if (victory) {
+                document.getElementById('victory-score').textContent = score;
+                document.getElementById('victory-menu').classList.add('active');
+            } else {
+                document.getElementById('final-level').textContent = level;
+                document.getElementById('final-score').textContent = score;
+                document.getElementById('gameover-menu').classList.add('active');
+            }
+        }
+
+        // Update UI
+        function updateUI() {
+            document.getElementById('level').textContent = `Level: ${level}/256`;
+            document.getElementById('hp').textContent = `HP: ${Math.ceil(playerHP)}/${maxHP}`;
+            document.getElementById('score').textContent = `Score: ${score}`;
+            document.getElementById('coins').textContent = `Coins: ${coins}`;
+            document.getElementById('enemies').textContent = `Enemies: ${enemies.length}`;
+            document.getElementById('wave').textContent = `Wave: ${wave}`;
+        }
+
+        // Game Loop
+        function gameLoop() {
+            if (!gameStarted) return;
+            
+            if (gameOver) {
+                requestAnimationFrame(gameLoop);
+                return;
+            }
+            
+            if (isPaused) {
+                requestAnimationFrame(gameLoop);
+                return;
+            }
+
+            updatePlayer();
+            updateBullets();
+            updateEnemyBullets();
+            checkLevelComplete();
+            draw();
+            updateUI();
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Don't auto-start - wait for menu
+        // startLevel();
+        // gameLoop();
+    </script>
+</body>
+</html>
